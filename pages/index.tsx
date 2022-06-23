@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import type TokenListResponse from "@api.video/nodejs-client/lib/model/TokenListResponse";
 import type UploadToken from "@api.video/nodejs-client/lib/model/UploadToken";
@@ -15,17 +15,14 @@ const Home: NextPage = () => {
   useEffect(() => {
     const instantiateUploadToken = async (): Promise<void> => {
       // Retrieve your upload tokens list
-      const { uploadTokensList } : { uploadTokensList: TokenListResponse } = await fetch(
-        `/api/uploadTokens`,
-        {
+      const { uploadTokensList }: { uploadTokensList: TokenListResponse } =
+        await fetch(`/api/uploadTokens`, {
           method: "GET",
-        }
-      ).then((res) => res.json());
+        }).then((res) => res.json());
 
       // If an upload token is available
       if (uploadTokensList.data?.length > 0) {
         setUploadToken(uploadTokensList.data[0].token);
-        console.log(uploadTokensList.data);
         return;
       }
 
@@ -52,38 +49,43 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         <h1 className={styles.title}>Upload a video!</h1>
 
-        {uploadToken && (
-          <UploadButton 
-          uploadToken={uploadToken}         
-          onUploadProgress={(progress) => {
-            setSuccess(false);
-            setError(false);
-            setProgress(
-              Math.round((progress.uploadedBytes * 100) / progress.totalBytes)
-            );
-          }}
-          onUploadSuccess={(video) => {
-            setSuccess(true);
-            console.log(video);
-          }}
-          onUploadError={(errorMessage) => {
-            setError(true);
-            console.log(errorMessage);
-          }}
-          style={{
-            marginTop: "30px",
-            padding: "15px",
-            color: "white",
-            backgroundColor: "black",
-            border: "2px solid black",
-            borderRadius: "15px",
-            fontSize: "1.5rem"
-          }}>
+        {uploadToken ? (
+          <UploadButton
+            uploadToken={uploadToken}
+            onUploadProgress={(progress) => {
+              setSuccess(false);
+              setError(false);
+              setProgress(
+                Math.round((progress.uploadedBytes * 100) / progress.totalBytes)
+              );
+            }}
+            onUploadSuccess={(video) => {
+              setSuccess(true);
+              console.log(video);
+            }}
+            onUploadError={(errorMessage) => {
+              setError(true);
+              console.log(errorMessage);
+            }}
+            style={{
+              marginTop: "30px",
+              padding: "15px",
+              color: "white",
+              backgroundColor: "black",
+              border: "2px solid black",
+              borderRadius: "15px",
+              fontSize: "1.5rem",
+            }}
+          >
             Upload {progress > 0 && progress < 100 && <span>{progress}%</span>}
           </UploadButton>
+        ) : (
+          <div style={{ padding: "15px" }}>Loading...</div>
         )}
-        {success && <div>Video uploaded successfully!</div>}
-        {error && <div>An error occured during the upload...</div>}
+        <div style={{ padding: "15px" }}>
+          {success && <div>Video uploaded successfully!</div>}
+          {error && <div>An error occured during the upload...</div>}
+        </div>
       </main>
     </div>
   );
