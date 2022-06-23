@@ -16,7 +16,7 @@ const Home: NextPage = () => {
     const instantiateUploadToken = async (): Promise<void> => {
       // Retrieve your upload tokens list
       const { uploadTokensList } : { uploadTokensList: TokenListResponse } = await fetch(
-        `${process.env.NEXT_PUBLIC_HOST}/api/uploadTokens`,
+        `/api/uploadTokens`,
         {
           method: "GET",
         }
